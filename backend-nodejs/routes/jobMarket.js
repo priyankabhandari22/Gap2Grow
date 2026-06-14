@@ -9,5 +9,6 @@ router.get('/trending-skills', authMiddleware, jobMarketController.getTrendingSk
 router.get('/overview', authMiddleware, jobMarketController.getJobMarketOverview);
 router.get('/search', authMiddleware, jobMarketController.searchJobMarket);
 router.get('/salary-insights', authMiddleware, jobMarketController.getSalaryInsights);
+router.post('/sync', authMiddleware, jobMarketController.syncJobMarketData);
 
 module.exports = router;

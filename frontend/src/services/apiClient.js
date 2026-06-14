@@ -1,6 +1,12 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+let API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+// Normalize hostless values like ":5000/api" to full URL using current origin
+if (API_URL && API_URL.startsWith(':')) {
+  const origin = window.location.protocol + '//' + window.location.hostname;
+  API_URL = origin + API_URL; // e.g. http://localhost:5000/api
+}
 
 // Create axios instance
 const apiClient = axios.create({

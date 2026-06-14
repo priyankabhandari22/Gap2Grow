@@ -49,6 +49,16 @@ const jobMarketService = {
     }
   },
 
+  // Sync job market data from external providers
+  syncJobMarketData: async (payload = {}) => {
+    try {
+      const response = await apiClient.post('/job-market/sync', payload);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Failed to sync job market data' };
+    }
+  },
+
   // Get salary insights
   getSalaryInsights: async (role, industry) => {
     try {

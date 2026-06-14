@@ -64,7 +64,73 @@ function SkillBar({ skill, matched, priority }) {
     );
 }
 
-export default function SkillGapForecast() {
+function formatIndianEstimateFromUSDThousands(value) {
+    const thousands = Number(value);
+
+    if (!Number.isFinite(thousands)) {
+        return '';
+    }
+
+    const rupees = thousands * 1000 * 83;
+
+    if (rupees >= 10000000) {
+        return `₹${(rupees / 10000000).toFixed(2).replace(/\.00$/, '')}Cr`;
+    }
+
+    return `₹${(rupees / 100000).toFixed(2).replace(/\.00$/, '')}L`;
+}
+
+function formatCompactThousands(value) {
+    const numberValue = Number(value);
+
+    if (!Number.isFinite(numberValue)) {
+        return '';
+    }
+
+    return Number.isInteger(numberValue)
+        ? String(numberValue)
+        : numberValue.toFixed(1).replace(/\.0$/, '');
+}
+
+function formatSalary(min, max, currency = 'USD') {
+    if (currency === 'INR') {
+        return `${formatIndianEstimateFromUSDThousands(min)} – ${formatIndianEstimateFromUSDThousands(max)} (India Estimate)`;
+    }
+
+    return `$${formatCompactThousands(min)}K – $${formatCompactThousands(max)}K USD`;
+}
+
+function formatSalaryDisplay(salaryRange, currency = 'USD') {
+    if (!salaryRange) {
+        return 'Salary not available';
+    }
+
+    if (typeof salaryRange === 'object' && salaryRange !== null) {
+        const { min, max, currency: rangeCurrency = currency } = salaryRange;
+        return formatSalary(min, max, rangeCurrency);
+    }
+
+    const rawValue = String(salaryRange)
+        .replace(/â€“|â€”|–|—/g, ' - ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    const rangeMatch = rawValue.match(/\$?\s*([\d,.]+)\s*k?\s*-\s*\$?\s*([\d,.]+)\s*k?/i);
+
+    if (rangeMatch) {
+        return formatSalary(rangeMatch[1], rangeMatch[2], currency);
+    }
+
+    if (/USD/i.test(rawValue)) {
+        return rawValue.replace(/\s*-\s*/g, ' – ').replace(/\bk\b/gi, 'K');
+    }
+
+    return `${rawValue.replace(/\s*-\s*/g, ' – ').replace(/\bk\b/gi, 'K')} USD`;
+}
+
+const SALARY_DISPLAY_CURRENCY = 'USD';
+
+function SkillGapForecast() {
     const navigate = useNavigate();
     const [roles, setRoles] = useState([]);
     const [selectedRole, setRole] = useState('');
@@ -248,7 +314,7 @@ export default function SkillGapForecast() {
                             <div className="sgf-market-item">
                                 <DollarSign size={17} color="#059669" />
                                 <div>
-                                    <span className="sgf-mval">{result.salary_range}</span>
+                                    <span className="sgf-mval">{formatSalaryDisplay(result.salary_range, SALARY_DISPLAY_CURRENCY)}</span>
                                     <span className="sgf-mlabel">Salary Range</span>
                                 </div>
                             </div>
@@ -383,3 +449,5 @@ export default function SkillGapForecast() {
         </div>
     );
 }
+
+export default SkillGapForecast;

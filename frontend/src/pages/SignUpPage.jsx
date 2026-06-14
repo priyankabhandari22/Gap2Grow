@@ -90,8 +90,8 @@ const SignUpPage = () => {
             </div>
           )}
 
-          <div className="form-row">
-            <div className="form-group">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2 form-group">
               <label htmlFor="firstName">First Name</label>
               <input
                 type="text"
@@ -103,7 +103,7 @@ const SignUpPage = () => {
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="col-span-1 form-group">
               <label htmlFor="lastName">Last Name</label>
               <input
                 type="text"

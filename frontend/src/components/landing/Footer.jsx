@@ -1,84 +1,101 @@
-import React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Linkedin, Twitter, Instagram, Facebook } from 'lucide-react';
 import './Footer.css';
-
+import logoImg from '../../assets/logo.jpeg';
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
+  const [isVisible, setIsVisible] = useState(false);
+  const footerRef = useRef(null);
 
-  const socialIcons = [
-    { name: 'LinkedIn', icon: '🔗', url: '#' },
-    { name: 'Twitter', icon: '𝕏', url: '#' },
-    { name: 'Instagram', icon: '📷', url: '#' },
-    { name: 'Facebook', icon: 'f', url: '#' }
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (footerRef.current) observer.observe(footerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const cols = [
+    {
+      title: "Product",
+      links: ["Features", "How It Works", "Pricing"]
+    },
+    {
+      title: "Company",
+      links: ["About Us", "Blog", "Contact", "Careers"]
+    },
+    {
+      title: "Support",
+      links: ["Help Center", "FAQ", "Privacy Policy", "Terms of Service"]
+    }
   ];
 
   return (
-    <footer className="footer">
-      <div className="footer-container">
-        <div className="footer-content">
-          <div className="footer-column footer-brand">
-            <img src="/logo.jpeg" alt="Gap2Grow Logo" style={{ width: '48px', height: '48px', borderRadius: '10px', objectFit: 'cover', marginBottom: '12px' }} />
-            <h3 className="footer-brand-name">Gap2Grow</h3>
-            <p className="footer-tagline">Bridging careers since 2024</p>
+    <footer className="footer-section" ref={footerRef}>
+      <div className={`footer-container ${isVisible ? 'visible' : ''}`}>
+        
+        {/* Main Footer Layout */}
+        <div className="footer-columns">
+          
+          {/* Col 1: Brand */}
+          <div className="footer-col brand-col" style={{ transitionDelay: '0ms' }}>
+            <div className="footer-logo">
+              <img src={logoImg} alt="Gap2Grow Logo" style={{ width: '32px', height: '32px', objectFit: 'cover', borderRadius: '6px', filter: 'brightness(0) invert(1)' }} />
+              <span>Gap2Grow</span>
+            </div>
+            <p className="footer-subtext">Bridging careers since 2024</p>
           </div>
 
-          <div className="footer-column">
-            <h4 className="footer-heading">Product</h4>
-            <ul className="footer-links">
-              <li><a href="#">Features</a></li>
-              <li><a href="#">How It Works</a></li>
-              <li><a href="#">Pricing</a></li>
-            </ul>
-          </div>
+          {/* Dynamic Links Columns */}
+          {cols.map((col, index) => (
+            <div 
+              key={col.title} 
+              className="footer-col" 
+              style={{ transitionDelay: `${(index + 1) * 100}ms` }}
+            >
+              <h4 className="footer-heading">{col.title}</h4>
+              <ul className="footer-links">
+                {col.links.map(link => (
+                  <li key={link}><a href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}>{link}</a></li>
+                ))}
+              </ul>
+            </div>
+          ))}
 
-          <div className="footer-column">
-            <h4 className="footer-heading">Company</h4>
-            <ul className="footer-links">
-              <li><a href="#">About Us</a></li>
-              <li><a href="#">Blog</a></li>
-              <li><a href="#">Contact</a></li>
-              <li><a href="#">Careers</a></li>
-            </ul>
-          </div>
-
-          <div className="footer-column">
-            <h4 className="footer-heading">Support</h4>
-            <ul className="footer-links">
-              <li><a href="#">Help Center</a></li>
-              <li><a href="#">FAQ</a></li>
-              <li><a href="#">Privacy Policy</a></li>
-              <li><a href="#">Terms of Service</a></li>
-            </ul>
-          </div>
-
-          <div className="footer-column footer-social">
+          {/* Col 5: Social */}
+          <div className="footer-col social-col" style={{ transitionDelay: '400ms' }}>
             <h4 className="footer-heading">Follow Us</h4>
             <div className="social-icons">
-              {socialIcons.map((social) => (
-                <a 
-                  key={social.name}
-                  href={social.url}
-                  className="social-icon"
-                  title={social.name}
-                >
-                  {social.icon}
-                </a>
-              ))}
+              <a href="#linkedin" className="social-icon" aria-label="LinkedIn"><Linkedin size={20} /></a>
+              <a href="#twitter" className="social-icon" aria-label="Twitter"><Twitter size={20} /></a>
+              <a href="#instagram" className="social-icon" aria-label="Instagram"><Instagram size={20} /></a>
+              <a href="#facebook" className="social-icon" aria-label="Facebook"><Facebook size={20} /></a>
             </div>
           </div>
+
         </div>
 
+        {/* Divider */}
         <div className="footer-divider"></div>
 
+        {/* Bottom Bar */}
         <div className="footer-bottom">
-          <p className="footer-copyright">
-            © {currentYear} Gap2Grow. All rights reserved.
-          </p>
-          <div className="footer-bottom-links">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Sitemap</a>
+          <p className="copyright">© 2024 Gap2Grow. All rights reserved.</p>
+          <div className="footer-legal-links">
+            <a href="#privacy">Privacy Policy</a>
+            <span>|</span>
+            <a href="#terms">Terms of Service</a>
+            <span>|</span>
+            <a href="#sitemap">Sitemap</a>
           </div>
         </div>
+
       </div>
     </footer>
   );

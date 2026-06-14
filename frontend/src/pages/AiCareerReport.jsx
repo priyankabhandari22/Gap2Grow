@@ -41,17 +41,19 @@ const AiCareerReport = () => {
 
     const handleGenerateReport = async () => {
         console.log('[FRONTEND: CAREER REPORT] Generate button clicked!');
-        if (!skillGap?._id) {
+        const activeSkillGap = skillGap || await fetchSkillGap(true);
+
+        if (!activeSkillGap?._id) {
             console.error('[FRONTEND: CAREER REPORT] No Skill Gap ID found, cannot generate.');
             setError('Please generate a Skill Gap Forecast first');
             return;
         }
 
         try {
-            console.log(`[FRONTEND: CAREER REPORT] Sending request to generate report for Skill Gap ID: ${skillGap._id}...`);
+            console.log(`[FRONTEND: CAREER REPORT] Sending request to generate report for Skill Gap ID: ${activeSkillGap._id}...`);
             setGenerating(true);
             setError(null);
-            const data = await reportService.generateCareerReport(skillGap._id);
+            const data = await reportService.generateCareerReport(activeSkillGap._id);
             console.log('[FRONTEND: CAREER REPORT] ✅ Successfully received generated report from backend:', data);
             setReport(data.report);
         } catch (err) {

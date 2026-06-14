@@ -7,7 +7,7 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import Dashboard from './pages/Dashboard';
-import Results from './pages/Results';
+import Profile from './pages/Profile';
 import ResumeAnalyzer from './pages/ResumeAnalyzer';
 import SkillGapForecast from './pages/SkillGapForecast';
 import MarketIntelligence from './pages/MarketIntelligence';
@@ -37,7 +37,7 @@ function App() {
             <Route path="/profile" element={
               <ProtectedRoute>
                 <MainLayout>
-                  <Results />
+                  <Profile />
                 </MainLayout>
               </ProtectedRoute>
             } />

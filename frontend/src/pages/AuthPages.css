@@ -9,7 +9,7 @@
   padding: 20px;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+  background: var(--page-gradient);
 }
 
 /* Add a grid overlay */
@@ -87,10 +87,12 @@
   z-index: 10;
   width: 100%;
   max-width: 450px;
-  background: white;
+  background: var(--surface);
   border-radius: 16px;
   padding: 40px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 60px var(--shadow-soft);
+  color: var(--text);
   animation: slideUp 0.5s ease-out;
 }
 
@@ -102,14 +104,14 @@
 .auth-title {
   font-size: 28px;
   font-weight: 700;
-  color: #1F2937;
+  color: var(--text);
   margin-bottom: 8px;
   letter-spacing: -0.3px;
 }
 
 .auth-subtitle {
   font-size: 14px;
-  color: #6B7280;
+  color: var(--text-muted);
   line-height: 1.6;
 }
 
@@ -127,47 +129,47 @@
 .form-group label {
   font-size: 14px;
   font-weight: 600;
-  color: #1F2937;
+  color: var(--text);
   margin-bottom: 8px;
 }
 
 .form-group input {
   padding: 12px 16px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border);
   border-radius: 10px;
   font-size: 14px;
-  background: white;
-  color: #1F2937;
+  background: var(--surface-inset);
+  color: var(--text);
   transition: all 0.3s ease;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #7C3AED;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-  background: rgba(124, 58, 237, 0.02);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  background: var(--surface-hover);
 }
 
 .form-group input:hover:not(:focus) {
-  border-color: #D1D5DB;
+  border-color: var(--border-light);
 }
 
 .form-group small {
   font-size: 12px;
-  color: #9CA3AF;
+  color: var(--text-muted);
   margin-top: 4px;
 }
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.8fr 1fr;
   gap: 16px;
 }
 
 .auth-error {
-  background: #FEE2E2;
-  border: 1px solid #FECACA;
-  color: #DC2626;
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid rgba(220, 38, 38, 0.22);
+  color: #fca5a5;
   padding: 12px 16px;
   border-radius: 10px;
   font-size: 14px;
@@ -176,7 +178,7 @@
 
 .auth-btn {
   padding: 12px 24px;
-  background: linear-gradient(135deg, #7C3AED, #A855F7);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
   border: none;
   border-radius: 10px;
@@ -206,18 +208,18 @@
   text-align: center;
   margin-top: 24px;
   font-size: 14px;
-  color: #6B7280;
+  color: var(--text-muted);
 }
 
 .auth-footer a {
-  color: #7C3AED;
+  color: var(--primary);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s ease;
 }
 
 .auth-footer a:hover {
-  color: #5B21B6;
+  color: var(--primary-hover);
 }
 
 @keyframes slideUp {

@@ -11,14 +11,21 @@ import {
     ChevronLeft,
     ChevronRight,
     Menu,
-    BrainCircuit
+    BrainCircuit,
+    Sun,
+    Moon
 } from 'lucide-react';
 import './Sidebar.css';
+
+const THEME_STORAGE_KEY = 'gap2grow-theme';
 
 const Sidebar = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [theme, setTheme] = useState(() => {
+        return window.localStorage.getItem(THEME_STORAGE_KEY) || 'light';
+    });
 
     // Handle window resize for responsive behavior
     useEffect(() => {
@@ -33,6 +40,25 @@ const Sidebar = () => {
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.style.colorScheme = theme;
+        window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+        window.dispatchEvent(new CustomEvent('gap2grow-theme-change', { detail: { theme } }));
+    }, [theme]);
+
+    useEffect(() => {
+        const handleThemeSync = (event) => {
+            const nextTheme = event?.detail?.theme;
+            if (nextTheme === 'light' || nextTheme === 'dark') {
+                setTheme(nextTheme);
+            }
+        };
+
+        window.addEventListener('gap2grow-theme-change', handleThemeSync);
+        return () => window.removeEventListener('gap2grow-theme-change', handleThemeSync);
     }, []);
 
     const menuItems = [
@@ -50,6 +76,10 @@ const Sidebar = () => {
 
     const handleMobileToggle = () => {
         setIsMobileOpen(!isMobileOpen);
+    };
+
+    const handleThemeToggle = () => {
+        setTheme((currentTheme) => (currentTheme === 'light' ? 'dark' : 'light'));
     };
 
     const closeMobileSidebar = () => {
@@ -127,6 +157,11 @@ const Sidebar = () => {
                 </nav>
 
                 <div className="sidebar-footer">
+                    <button className="theme-toggle-btn" onClick={handleThemeToggle} type="button">
+                        <div className="nav-icon">{theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}</div>
+                        <span className="nav-label">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+                    </button>
+
                     <NavLink
                         to="/settings"
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}

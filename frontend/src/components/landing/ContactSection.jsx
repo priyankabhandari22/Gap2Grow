@@ -1,107 +1,125 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 import './ContactSection.css';
 
 const ContactSection = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
-  });
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
+  const [formState, setFormState] = useState('idle'); // idle, loading, success
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [focusedField, setFocusedField] = useState(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
+    setFormState('loading');
     
-    // Simulate form submission
+    // Simulate API call
     setTimeout(() => {
-      setSubmitted(true);
-      setLoading(false);
-      setFormData({ name: '', email: '', message: '' });
-      
-      // Hide success message after 5 seconds
+      setFormState('success');
       setTimeout(() => {
-        setSubmitted(false);
+        setFormState('idle');
+        setFormData({ name: '', email: '', message: '' });
       }, 5000);
     }, 1500);
   };
 
   return (
-    <section id="contact" className="contact-section">
+    <section className="contact-section" id="contact" ref={sectionRef}>
       <div className="contact-container">
-        <div className="contact-header">
-          <h2 className="contact-title">Get in Touch</h2>
-          <p className="contact-subtitle">
-            Have questions? We'd love to hear from you. Drop us a message and we'll get back to you soon.
-          </p>
+        
+        <div className={`contact-header-wrapper ${isVisible ? 'visible' : ''}`}>
+          <h2 className="contact-heading">Get in Touch</h2>
+          <p className="contact-subheading">Have questions? We'd love to hear from you. Drop us a message and we'll get back to you soon.</p>
         </div>
 
-        <div className="contact-form-wrapper">
-          <form className="contact-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="name" className="form-label">Name</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                className="form-input"
-                placeholder="Your name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
+        <div className={`contact-form-container ${isVisible ? 'visible' : ''}`}>
+          {formState === 'success' ? (
+            <div className="contact-success-state">
+              <CheckCircle2 size={64} className="success-icon" />
+              <h3>Thank you!</h3>
+              <p>Your message has been sent successfully. We will get back to you shortly.</p>
             </div>
+          ) : (
+            <form className="contact-form" onSubmit={handleSubmit}>
+              
+              <div className="form-group">
+                <label className={`form-label ${focusedField === 'name' ? 'focused' : ''}`}>Full Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  className="form-input"
+                  placeholder="John Doe"
+                  value={formData.name}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField('name')}
+                  onBlur={() => setFocusedField(null)}
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="email" className="form-label">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                className="form-input"
-                placeholder="your.email@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
+              <div className="form-group">
+                <label className={`form-label ${focusedField === 'email' ? 'focused' : ''}`}>Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  className="form-input"
+                  placeholder="john@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField(null)}
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="message" className="form-label">Message</label>
-              <textarea
-                id="message"
-                name="message"
-                className="form-textarea"
-                placeholder="Your message..."
-                value={formData.message}
-                onChange={handleChange}
-                required
-              ></textarea>
-            </div>
+              <div className="form-group">
+                <label className={`form-label ${focusedField === 'message' ? 'focused' : ''}`}>Your Message</label>
+                <textarea
+                  name="message"
+                  className="form-textarea"
+                  placeholder="How can we help you?"
+                  value={formData.message}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField('message')}
+                  onBlur={() => setFocusedField(null)}
+                  required
+                ></textarea>
+              </div>
 
-            <button 
-              type="submit" 
-              className="form-submit-btn"
-              disabled={loading}
-            >
-              {loading ? 'Sending...' : 'Send Message'}
-            </button>
-          </form>
-
-          {submitted && (
-            <div className="success-message">
-              <span className="success-icon">✓</span>
-              Thank you! We've received your message. We'll be in touch soon.
-            </div>
+              <button 
+                type="submit" 
+                className="submit-btn" 
+                disabled={formState === 'loading'}
+              >
+                {formState === 'loading' ? (
+                  <>
+                    <Loader2 size={20} className="spinner-icon" />
+                    Sending...
+                  </>
+                ) : (
+                  'Send Message'
+                )}
+              </button>
+            </form>
           )}
         </div>
       </div>

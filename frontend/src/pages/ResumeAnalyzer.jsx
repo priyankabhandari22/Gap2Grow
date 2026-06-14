@@ -5,6 +5,8 @@ import {
     Tag, Clock, Layers, ArrowRight, Loader2, X, FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useDashboard } from '../context/DashboardContext';
+import resumeService from '../services/resumeService';
 import './ResumeAnalyzer.css';
 
 const API = import.meta.env.VITE_PYTHON_BACKEND_URL;
@@ -38,7 +40,7 @@ function DropZone({ file, onFile, onClear }) {
         e.preventDefault();
         setDragging(false);
         const f = e.dataTransfer.files?.[0];
-        if (f?.type === 'application/pdf') onFile(f);
+        if (f && ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(f.type)) onFile(f);
     };
 
     return (
@@ -49,10 +51,10 @@ function DropZone({ file, onFile, onClear }) {
             onDrop={handleDrop}
             onClick={() => !file && inputRef.current.click()}
         >
-            <input
+                <input
                 ref={inputRef}
-                type="file"
-                accept="application/pdf"
+                    type="file"
+                    accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 style={{ display: 'none' }}
                 onChange={e => onFile(e.target.files[0])}
             />
@@ -70,8 +72,8 @@ function DropZone({ file, onFile, onClear }) {
             ) : (
                 <div className="ra-dz-empty">
                     <UploadCloud size={40} color="#6366f1" />
-                    <p className="ra-dz-title">Drop your PDF résumé here</p>
-                    <p className="ra-dz-hint">or click to browse · PDF only · max 10 MB</p>
+                    <p className="ra-dz-title">Drop your résumé (PDF/DOCX) here</p>
+                    <p className="ra-dz-hint">or click to browse · PDF / DOC / DOCX · max 10 MB</p>
                 </div>
             )}
         </div>
@@ -109,6 +111,7 @@ function ContactRow({ icon, value, href }) {
 /* ── Main page ───────────────────────────────────────────── */
 export default function ResumeAnalyzer() {
     const navigate = useNavigate();
+    const { setCurrentResume } = useDashboard();
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
@@ -126,23 +129,38 @@ export default function ResumeAnalyzer() {
         setError('');
         setResult(null);
 
-        try {
-            const fd = new FormData();
-            fd.append('file', file);
+            try {
+                // Use service that validates with Python parser first
+                const resp = await resumeService.uploadResume(file);
+                const data = resp.parsed || resp; // parsed data from Python
+                setResult(data);
 
-            const res = await fetch(`${API}/parse-resume`, { method: 'POST', body: fd });
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({ detail: 'Unknown error' }));
-                throw new Error(err.detail || `HTTP ${res.status}`);
-            }
-            const data = await res.json();
-            setResult(data);
-
-            // Persist flat skills list so Skill Gap Forecast page can use them
-            localStorage.setItem('gap2grow_extracted_skills', JSON.stringify(data.all_skills));
-            localStorage.setItem('gap2grow_resume_id', data.resume_id);
+                // Persist flat skills list so Skill Gap Forecast page can use them
+                localStorage.setItem('gap2grow_extracted_skills', JSON.stringify(data.all_skills));
+                localStorage.setItem('gap2grow_resume_id', data.resume_id || resp.resume?.resume_id || resp.resume?._id);
+                const currentResume = {
+                    resume_id: data.resume_id || resp.resume?.resume_id || resp.resume?._id,
+                    filename: data.filename || file.name,
+                    contact: data.contact,
+                    categorized_skills: data.categorized_skills,
+                    all_skills: data.all_skills,
+                    education: data.education,
+                    experience: data.experience,
+                    total_exp_years: data.total_exp_years,
+                    sections_found: data.sections_found,
+                    text_preview: data.text_preview,
+                    skill_count: data.skill_count
+                };
+                localStorage.setItem('gap2grow_current_resume', JSON.stringify(currentResume));
+                setCurrentResume(currentResume);
         } catch (e) {
-            setError(e.message || 'Analysis failed. Is the backend running?');
+            // Try to recover structured error messages from API
+            const raw = e?.detail || e?.error || e?.message || e;
+            let msg = '';
+            if (typeof raw === 'string') msg = raw;
+            else if (raw && typeof raw === 'object') msg = raw.message || raw.detail || raw.error || JSON.stringify(raw);
+            else msg = String(raw);
+            setError(msg || 'Analysis failed. Is the backend running?');
         } finally {
             setLoading(false);
         }

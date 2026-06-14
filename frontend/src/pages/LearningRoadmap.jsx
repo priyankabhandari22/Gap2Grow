@@ -41,17 +41,19 @@ const LearningRoadmap = () => {
 
     const handleGenerateRoadmap = async () => {
         console.log('[FRONTEND: LEARNING ROADMAP] Generate button clicked!');
-        if (!skillGap?._id) {
+        const activeSkillGap = skillGap || await fetchSkillGap(true);
+
+        if (!activeSkillGap?._id) {
             console.error('[FRONTEND: LEARNING ROADMAP] No Skill Gap ID found, cannot generate.');
             setError('Please generate a Skill Gap Forecast first');
             return;
         }
 
         try {
-            console.log(`[FRONTEND: LEARNING ROADMAP] Sending request to generate roadmap for Skill Gap ID: ${skillGap._id}...`);
+            console.log(`[FRONTEND: LEARNING ROADMAP] Sending request to generate roadmap for Skill Gap ID: ${activeSkillGap._id}...`);
             setGenerating(true);
             setError(null);
-            const data = await reportService.generateLearningRoadmap(skillGap._id);
+            const data = await reportService.generateLearningRoadmap(activeSkillGap._id);
             console.log('[FRONTEND: LEARNING ROADMAP] ✅ Successfully received generated roadmap from backend:', data);
             setRoadmap(data.roadmap);
         } catch (err) {

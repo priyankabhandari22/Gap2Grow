@@ -356,6 +356,12 @@ def parse_resume(file_path: str) -> ParsedResume:
     """
     raw_text = extract_text_from_pdf(file_path)
 
+    # Quick heuristic to ensure we only parse résumé documents
+    is_like, reason = _is_likely_resume(raw_text)
+    if not is_like:
+        # reason is a dict {code, message}
+        raise ValueError(reason)
+
     sections       = _split_into_sections(raw_text)
     sections_found = [k for k in sections if k != '_preamble' and sections[k].strip()]
 
@@ -375,6 +381,90 @@ def parse_resume(file_path: str) -> ParsedResume:
         total_exp_years   = total_exp,
         sections_found    = sections_found,
     )
+
+
+def parse_resume_from_text(raw_text: str, filename: str = 'uploaded') -> ParsedResume:
+    """
+    Parse resume content from a provided raw text string (used by /api/parse-text).
+    """
+    # Reuse the same pipeline but skip PDF extraction
+    if not raw_text or len(raw_text.strip()) < 50:
+        raise ValueError({"code": "too_short", "message": "Provided text is too short or empty."})
+
+    is_like, reason = _is_likely_resume(raw_text)
+    if not is_like:
+        raise ValueError(reason)
+
+    sections = _split_into_sections(raw_text)
+    sections_found = [k for k in sections if k != '_preamble' and sections[k].strip()]
+
+    contact = _extract_contact(raw_text)
+    cat_skills = _extract_skills_from_text(raw_text)
+    all_skills = [s for skills in cat_skills.values() for s in skills]
+    education = _extract_education(sections)
+    experience, total_exp = _extract_experience(sections)
+
+    return ParsedResume(
+        raw_text=raw_text,
+        contact=contact,
+        categorized_skills=cat_skills,
+        all_skills=all_skills,
+        education=education,
+        experience=experience,
+        total_exp_years=total_exp,
+        sections_found=sections_found,
+    )
+
+
+def _is_likely_resume(text: str):
+    """
+    Heuristic to detect whether the given text looks like a résumé.
+    Combines contact presence, section headers, job-title tokens and skill density.
+    Returns True if confidence is high enough.
+    """
+    if not text or len(text.strip()) < 200:
+        return False, {"code": "too_short", "message": "Document text is too short; may be scanned or empty."}
+
+    # Contact signals (require at least one)
+    has_email = bool(_EMAIL_RE.search(text))
+    has_phone = bool(_PHONE_RE.search(text))
+    has_linkedin = bool(_LINKEDIN_RE.search(text))
+    has_github = bool(_GITHUB_RE.search(text))
+
+    contact_count = 0
+    if has_email: contact_count += 1
+    if has_phone: contact_count += 1
+    if has_linkedin or has_github: contact_count += 1
+
+    # Section headers
+    has_section = False
+    for key in ('skills', 'experience', 'education', 'projects'):
+        if SECTION_PATTERNS.get(key) and SECTION_PATTERNS[key].search(text):
+            has_section = True
+            break
+
+    # Job title tokens
+    has_title_token = bool(_JOB_TITLE_RE.search(text))
+
+    # Skill density: count distinct matched skills (lightweight, stop at 6)
+    text_lower = text.lower()
+    matched_skills = 0
+    for skill_lower in _SKILL_LOWER_TO_CANONICAL.keys():
+        if re.search(r'(?<![a-zA-Z0-9])' + re.escape(skill_lower) + r'(?![a-zA-Z0-9])', text_lower):
+            matched_skills += 1
+            if matched_skills >= 6:
+                break
+
+    # Decision logic:
+    # - Require at least one contact signal
+    if contact_count == 0:
+        return False, {"code": "no_contact", "message": "No contact information (email/phone/linkedin/github) found."}
+
+    # - Require at least one of: section header present OR >=3 matched skills OR job title token
+    if has_section or matched_skills >= 3 or has_title_token:
+        return True, None
+
+    return False, {"code": "low_confidence", "message": "Document lacks clear resume sections or enough skill mentions."}
 
 
 # ─────────────────────────────────────────────────────────────

@@ -57,6 +57,34 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  githubUsername: {
+    type: String,
+    default: ''
+  },
+  githubProfileUrl: {
+    type: String,
+    default: ''
+  },
+  githubAvatarUrl: {
+    type: String,
+    default: ''
+  },
+  githubBio: {
+    type: String,
+    default: ''
+  },
+  githubRepoCount: {
+    type: Number,
+    default: 0
+  },
+  githubTopLanguages: [{
+    name: String,
+    count: Number
+  }],
+  githubSyncedAt: {
+    type: Date,
+    default: null
+  },
   isVerified: {
     type: Boolean,
     default: false

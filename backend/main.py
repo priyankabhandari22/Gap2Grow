@@ -121,7 +121,12 @@ async def parse_resume_endpoint(file: UploadFile = File(...)):
             f.write(content)
 
         # Run the full parser pipeline
-        parsed = parse_resume(temp_path)
+        try:
+            parsed = parse_resume(temp_path)
+        except ValueError as ve:
+            # If the ValueError carries a structured reason dict, propagate it as the detail
+            reason = ve.args[0] if ve.args else str(ve)
+            raise HTTPException(status_code=400, detail=reason)
 
         # Persist to MongoDB
         resumes_col = get_collection("resumes")
@@ -182,6 +187,12 @@ async def upload_resume(file: UploadFile = File(...)):
             buffer.write(content)
             
         text = extract_text_from_pdf(temp_file_path)
+        # Reject non-resume PDFs early
+        from services.resume_service import _is_likely_resume
+        is_like, reason = _is_likely_resume(text)
+        if not is_like:
+            # reason is a dict; raise with that detail so frontend can display specific message
+            raise HTTPException(status_code=400, detail=reason)
         skills = extract_skills(text)
         
         # Save to DB
@@ -209,6 +220,67 @@ async def upload_resume(file: UploadFile = File(...)):
             extracted_skills=skills
         ).dict()
     }
+
+
+@app.post("/api/parse-text", response_model=ParsedResumeResponse)
+async def parse_text_endpoint(payload: dict = Body(...)):
+    """
+    Parse provided raw text (used for DOC/DOCX uploads where Node extracts text).
+    Expects JSON: { "text": "...", "filename": "optional name" }
+    """
+    text = payload.get('text')
+    filename = payload.get('filename', 'uploaded')
+    if not text:
+        raise HTTPException(status_code=400, detail={"code": "no_text", "message": "No text provided for parsing."})
+
+    try:
+        from services.resume_service import parse_resume_from_text
+        parsed = parse_resume_from_text(text, filename=filename)
+    except ValueError as ve:
+        reason = ve.args[0] if ve.args else str(ve)
+        raise HTTPException(status_code=400, detail=reason)
+    except Exception as e:
+        print(f"[parse-text] Error: {e}")
+        raise HTTPException(status_code=500, detail=f"Text parsing failed: {str(e)}")
+
+    # Persist to MongoDB as in file-based parser
+    try:
+        resumes_col = get_collection("resumes")
+        resume_doc = ResumeDoc(
+            filename=filename,
+            text_content=parsed.raw_text,
+            extracted_skills=parsed.all_skills,
+        )
+        result = await resumes_col.insert_one(resume_doc.dict(by_alias=True, exclude={"id"}))
+        resume_id = str(result.inserted_id)
+    except Exception as e:
+        print(f"[parse-text] DB write failed: {e}")
+        resume_id = None
+
+    return ParsedResumeResponse(
+        resume_id=resume_id,
+        filename=filename,
+        contact=ContactInfoSchema(
+            email=parsed.contact.email,
+            phone=parsed.contact.phone,
+            linkedin=parsed.contact.linkedin,
+            github=parsed.contact.github,
+        ),
+        categorized_skills=parsed.categorized_skills,
+        all_skills=parsed.all_skills,
+        education=[
+            EducationEntrySchema(raw=e.raw, degree=e.degree, years=e.years)
+            for e in parsed.education
+        ],
+        experience=[
+            ExperienceEntrySchema(raw=e.raw, title=e.title, years=e.years)
+            for e in parsed.experience
+        ],
+        total_exp_years=parsed.total_exp_years,
+        sections_found=parsed.sections_found,
+        text_preview=parsed.raw_text[:600].strip(),
+        skill_count=len(parsed.all_skills),
+    )
 
 @app.post("/api/analyze", response_model=AnalysisResponse)
 async def analyze_skills_endpoint(request: AnalyzeRequest):

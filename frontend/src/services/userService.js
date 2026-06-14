@@ -11,6 +11,16 @@ const userService = {
     }
   },
 
+  // Get personalized dashboard summary
+  getDashboardSummary: async () => {
+    try {
+      const response = await apiClient.get('/users/dashboard-summary');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Failed to fetch dashboard summary' };
+    }
+  },
+
   // Update profile
   updateProfile: async (userData) => {
     try {
@@ -19,6 +29,28 @@ const userService = {
       return response.data;
     } catch (error) {
       throw error.response?.data || { error: 'Failed to update profile' };
+    }
+  },
+
+  // Connect GitHub account by username
+  connectGitHub: async (githubUsername) => {
+    try {
+      const response = await apiClient.post('/users/github/connect', { githubUsername });
+      localStorage.setItem('gap2grow_user', JSON.stringify(response.data.user));
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Failed to connect GitHub account' };
+    }
+  },
+
+  // Disconnect GitHub account
+  disconnectGitHub: async () => {
+    try {
+      const response = await apiClient.post('/users/github/disconnect');
+      localStorage.setItem('gap2grow_user', JSON.stringify(response.data.user));
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Failed to disconnect GitHub account' };
     }
   },
 

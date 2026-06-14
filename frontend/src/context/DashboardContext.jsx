@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback } from 'react';
+import React, { createContext, useState, useCallback, useEffect } from 'react';
 import userService from '../services/userService';
 import skillService from '../services/skillService';
 import resumeService from '../services/resumeService';
@@ -8,12 +8,26 @@ import progressService from '../services/progressService';
 
 export const DashboardContext = createContext();
 
+const STORAGE_KEYS = {
+  skillGap: 'gap2grow_skill_gap',
+  currentResume: 'gap2grow_current_resume'
+};
+
+function readStoredJson(key, fallback = null) {
+  try {
+    const rawValue = localStorage.getItem(key);
+    return rawValue ? JSON.parse(rawValue) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export const DashboardProvider = ({ children }) => {
   const [userProfile, setUserProfile] = useState(null);
   const [skills, setSkills] = useState([]);
   const [resumes, setResumes] = useState([]);
-  const [currentResume, setCurrentResume] = useState(null);
-  const [skillGap, setSkillGap] = useState(null);
+  const [currentResume, setCurrentResume] = useState(() => readStoredJson(STORAGE_KEYS.currentResume));
+  const [skillGap, setSkillGap] = useState(() => readStoredJson(STORAGE_KEYS.skillGap));
   const [learningPaths, setLearningPaths] = useState([]);
   const [activePath, setActivePath] = useState(null);
   const [progress, setProgress] = useState(null);
@@ -30,6 +44,22 @@ export const DashboardProvider = ({ children }) => {
   const setItemError = useCallback((key, value) => {
     setError(prev => ({ ...prev, [key]: value }));
   }, []);
+
+  useEffect(() => {
+    if (skillGap) {
+      localStorage.setItem(STORAGE_KEYS.skillGap, JSON.stringify(skillGap));
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.skillGap);
+    }
+  }, [skillGap]);
+
+  useEffect(() => {
+    if (currentResume) {
+      localStorage.setItem(STORAGE_KEYS.currentResume, JSON.stringify(currentResume));
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.currentResume);
+    }
+  }, [currentResume]);
 
   // Fetch user profile
   const fetchUserProfile = useCallback(async (force = false) => {
@@ -304,6 +334,7 @@ export const DashboardProvider = ({ children }) => {
     // Resumes
     resumes,
     currentResume,
+    setCurrentResume,
     fetchResumes,
     uploadResume,
     

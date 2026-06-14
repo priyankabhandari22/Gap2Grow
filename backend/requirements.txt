@@ -6,5 +6,5 @@ pandas
 scikit-learn
 pydantic
 motor
-bson
+pymongo
 pydantic-settings

@@ -1,8 +1,22 @@
 const JobMarket = require('../models/JobMarket');
+const { syncMarketData } = require('../services/marketDataIngestionService');
+
+async function ensureMarketDataAvailable() {
+  const count = await JobMarket.countDocuments();
+
+  if (count > 0) {
+    return;
+  }
+
+  if (process.env.ADZUNA_APP_ID && process.env.ADZUNA_APP_KEY) {
+    await syncMarketData();
+  }
+}
 
 // Get job market data for a specific role
 exports.getJobMarketData = async (req, res) => {
   try {
+    await ensureMarketDataAvailable();
     const { role, industry } = req.query;
 
     if (!role) {
@@ -28,6 +42,7 @@ exports.getJobMarketData = async (req, res) => {
 // Get trending skills
 exports.getTrendingSkills = async (req, res) => {
   try {
+    await ensureMarketDataAvailable();
     const { role, industry } = req.query;
 
     if (!role) {
@@ -58,6 +73,7 @@ exports.getTrendingSkills = async (req, res) => {
 // Get job market overview
 exports.getJobMarketOverview = async (req, res) => {
   try {
+    await ensureMarketDataAvailable();
     const { role, industry } = req.query;
 
     if (!role) {
@@ -92,6 +108,7 @@ exports.getJobMarketOverview = async (req, res) => {
 // Search job market data
 exports.searchJobMarket = async (req, res) => {
   try {
+    await ensureMarketDataAvailable();
     const { q, industry } = req.query;
 
     let query = {};
@@ -104,7 +121,7 @@ exports.searchJobMarket = async (req, res) => {
       query.industry = { $regex: industry, $options: 'i' };
     }
 
-    const results = await JobMarket.find(query).limit(20);
+    const results = await JobMarket.find(query).sort({ lastUpdated: -1 }).limit(50);
 
     res.status(200).json({
       count: results.length,
@@ -119,6 +136,7 @@ exports.searchJobMarket = async (req, res) => {
 // Get salary insights
 exports.getSalaryInsights = async (req, res) => {
   try {
+    await ensureMarketDataAvailable();
     const { role, industry } = req.query;
 
     if (!role) {
@@ -144,5 +162,26 @@ exports.getSalaryInsights = async (req, res) => {
   } catch (err) {
     console.error('Get salary insights error:', err);
     res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.syncJobMarketData = async (req, res) => {
+  try {
+    const { country, pages, pageSize, roles } = req.body || {};
+
+    const summary = await syncMarketData({
+      country,
+      pages,
+      pageSize,
+      roles: Array.isArray(roles) ? roles : undefined
+    });
+
+    res.status(200).json({
+      message: 'Job market data synced successfully',
+      summary
+    });
+  } catch (err) {
+    console.error('Sync job market data error:', err);
+    res.status(500).json({ error: err.message || 'Failed to sync job market data' });
   }
 };

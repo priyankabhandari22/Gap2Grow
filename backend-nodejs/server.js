@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
+const { startMarketDataSyncScheduler } = require('./services/marketSyncScheduler');
 
 dotenv.config();
 
@@ -20,10 +21,22 @@ mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('✅ MongoDB connected'))
+.then(() => {
+  console.log('✅ MongoDB connected');
+  startMarketDataSyncScheduler();
+})
 .catch(err => {
   console.error('❌ MongoDB connection error:', err);
-  process.exit(1);
+  console.warn('Continuing without MongoDB connection (development mode). Some features may be unavailable.');
+});
+
+// Global error handlers to prevent nodemon from exiting on uncaught errors during development
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err && err.stack ? err.stack : err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 // Routes
