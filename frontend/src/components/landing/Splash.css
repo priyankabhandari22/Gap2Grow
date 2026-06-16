@@ -33,15 +33,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 0 24px;
 }
 
-/* Logo Box */
 .splash-logo-box {
-  width: 120px;
-  height: 120px;
+  width: clamp(80px, 20vw, 120px);
+  height: clamp(80px, 20vw, 120px);
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
-  border-radius: 28px;
+  border-radius: clamp(20px, 4vw, 28px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,6 +54,10 @@
   opacity: 0;
 }
 
+.splash-logo-box img {
+  border-radius: clamp(20px, 4vw, 28px) !important;
+}
+
 @keyframes scaleBounce {
   to { opacity: 1; transform: scale(1); }
 }
@@ -62,29 +66,28 @@
   to { transform: scale(0.9); }
 }
 
-/* Brand Text */
 .splash-brand-text {
   font-family: 'Inter', sans-serif;
-  font-size: 48px;
+  font-size: clamp(32px, 8vw, 48px);
   font-weight: 800;
   color: white;
-  margin-top: 24px;
+  margin-top: clamp(16px, 4vw, 24px);
   letter-spacing: -1px;
   opacity: 0;
   transform: translateY(20px);
   animation: slideFadeUp 0.4s ease-out 0.1s forwards;
+  text-align: center;
 }
 
 @keyframes slideFadeUp {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Spinner */
 .splash-spinner-container {
   position: relative;
-  width: 60px;
-  height: 60px;
-  margin-top: 40px;
+  width: clamp(40px, 10vw, 60px);
+  height: clamp(40px, 10vw, 60px);
+  margin-top: clamp(24px, 6vw, 40px);
   opacity: 0;
   animation: fadeInSpinner 0.3s ease-out 0.3s forwards;
 }
@@ -129,7 +132,6 @@
   50% { opacity: 1; transform: scale(1.1); }
 }
 
-/* Orbs & Particles */
 .splash-orb {
   position: absolute;
   border-radius: 50%;
@@ -137,9 +139,9 @@
   background: rgba(255,255,255,0.1);
   animation: floatOrb 8s ease-in-out infinite alternate;
 }
-.orb-1 { width: 300px; height: 300px; top: -50px; left: -50px; }
-.orb-2 { width: 250px; height: 250px; bottom: 10%; right: -20px; animation-delay: -2s; }
-.orb-3 { width: 200px; height: 200px; top: 40%; left: 60%; animation-delay: -4s; background: rgba(6,182,212,0.15); }
+.orb-1 { width: min(300px, 60vw); height: min(300px, 60vw); top: -50px; left: -50px; }
+.orb-2 { width: min(250px, 50vw); height: min(250px, 50vw); bottom: 10%; right: -20px; animation-delay: -2s; }
+.orb-3 { width: min(200px, 40vw); height: min(200px, 40vw); top: 40%; left: 60%; animation-delay: -4s; background: rgba(6,182,212,0.15); }
 
 .splash-particle {
   position: absolute;
@@ -162,3 +164,8 @@
 .particle-4 { width: 6px; height: 6px; right: 25%; bottom: 40%; animation-delay: 0.8s; }
 .particle-5 { width: 9px; height: 9px; left: 80%; top: 40%; animation-delay: 3s; }
 .particle-6 { width: 4px; height: 4px; left: 30%; top: 60%; animation-delay: 1.5s; }
+
+@media (max-width: 480px) {
+  .splash-orb { filter: blur(30px); }
+  .particle-3, .particle-5 { display: none; }
+}

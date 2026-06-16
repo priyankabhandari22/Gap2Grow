@@ -18,7 +18,7 @@ export default function Results() {
     }
 
     const { analysis, roadmap } = data;
-    const { gap_score, job_role, user_skills, missing_skills, required_skills } = analysis;
+    const { gap_score, job_role, user_skills, missing_skills } = analysis;
 
     const scoreColor = gap_score > 75 ? 'var(--success)' : gap_score > 40 ? 'var(--warning)' : 'var(--danger)';
 

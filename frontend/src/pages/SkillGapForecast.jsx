@@ -12,7 +12,6 @@ const API = import.meta.env.VITE_PYTHON_BACKEND_URL;
 
 /* ── helpers ─────────────────────────────────────────────── */
 function scoreColor(s) { return s >= 80 ? '#059669' : s >= 60 ? '#d97706' : s >= 40 ? '#f97316' : '#dc2626'; }
-function scoreBg(s) { return s >= 80 ? 'rgba(5,150,105,.10)' : s >= 60 ? 'rgba(217,119,6,.10)' : s >= 40 ? 'rgba(249,115,22,.10)' : 'rgba(220,38,38,.10)'; }
 function readinessDot(r) {
     const map = { Excellent: '#059669', Promising: '#d97706', Building: '#f97316', 'Needs Work': '#dc2626' };
     return map[r] || '#6366f1';

@@ -70,6 +70,24 @@
   padding: 1rem;
 }
 
+@media (max-width: 480px) {
+  .auth-card-wrapper {
+    padding: 0.5rem;
+  }
+  .auth-card {
+    padding: 1.75rem 1.25rem 1.5rem;
+  }
+  .auth-title {
+    font-size: 1.15rem;
+  }
+  .auth-arc {
+    display: none;
+  }
+  .auth-social-row {
+    gap: 0.5rem;
+  }
+}
+
 .auth-card {
   background: var(--surface);
   backdrop-filter: blur(20px);

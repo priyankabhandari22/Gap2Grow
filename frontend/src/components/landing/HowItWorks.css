@@ -1,13 +1,13 @@
 .how-section {
   position: relative;
   width: 100%;
-  background-color: #f8dddd;
+  background: linear-gradient(180deg, #f8f9ff 0%, #f3e8ff 50%, #ffffff 100%);
   padding: 100px 0;
   overflow: hidden;
 }
 
 :root[data-theme='dark'] .how-section {
-  background-color: #0b1020;
+  background: linear-gradient(180deg, #0b1020 0%, #111827 50%, #0f172a 100%);
 }
 
 .how-pattern-overlay {
@@ -92,14 +92,13 @@
   position: relative;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-  background: rgb(184, 160, 160); /* Fallback */
+  background: #ffffff;
 }
 
-/* Dynamic Colorful Backgrounds */
-.step-card.accent-violet { background: linear-gradient(160deg, #a49ec2 0%, #f5f3ff 100%); }
-.step-card.accent-cyan { background: linear-gradient(160deg, #ffffff 0%, #61c8ce 100%); }
+.step-card.accent-violet { background: linear-gradient(160deg, #ffffff 0%, #f5f3ff 100%); }
+.step-card.accent-cyan { background: linear-gradient(160deg, #ffffff 0%, #ecfeff 100%); }
 .step-card.accent-fuchsia { background: linear-gradient(160deg, #ffffff 0%, #fdf4ff 100%); }
-.step-card.accent-blue { background: linear-gradient(160deg, #4e25f1 0%, #eff6ff 100%); }
+.step-card.accent-blue { background: linear-gradient(160deg, #ffffff 0%, #eff6ff 100%); }
 
 :root[data-theme='dark'] .step-card {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
@@ -317,5 +316,24 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
+    padding: 24px 20px;
+  }
+  .step-title {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 400px) {
+  .how-heading {
+    font-size: 24px;
+  }
+  .step-badge {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+  .step-card {
+    padding: 20px 16px;
+    gap: 16px;
   }
 }

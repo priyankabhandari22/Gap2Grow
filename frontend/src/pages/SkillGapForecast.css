@@ -8,6 +8,15 @@
   margin: 0 auto;
 }
 
+@media (max-width: 640px) {
+  .sgf-page { padding: 1.5rem 1rem; }
+  .sgf-header h1 { font-size: 1.5rem; }
+  .sgf-select { max-width: 100%; }
+  .sgf-hero { flex-direction: column; }
+  .sgf-market-stats { min-width: unset; width: 100%; }
+  .sgf-bar-row { grid-template-columns: 1fr 60px 24px; gap: 0.35rem; }
+}
+
 /* ── Header ──────────────────────────────────── */
 .sgf-header { margin-bottom: 1.75rem; }
 .sgf-header h1 { font-size: 2rem; margin-bottom: 0.3rem; }

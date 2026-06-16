@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './AuthPages.css';
 
@@ -48,6 +49,9 @@ const LoginPage = () => {
       </div>
 
       <div className="auth-card">
+        <button className="auth-back-btn" onClick={() => navigate('/')} aria-label="Back to home">
+          <ArrowLeft size={20} />
+        </button>
         <div className="auth-header">
           <img src="/logo.jpeg" alt="Gap2Grow Logo" style={{ width: '64px', height: '64px', borderRadius: '12px', objectFit: 'cover', margin: '0 auto 16px', display: 'block' }} />
           <h1 className="auth-title">Welcome Back</h1>

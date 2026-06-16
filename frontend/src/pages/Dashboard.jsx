@@ -103,7 +103,6 @@ export default function Dashboard() {
     const [recent, setRecent] = useState([]);
     const [profile, setProfile] = useState(null);
     const [progressOverTime, setProgressOverTime] = useState([]);
-    const [lastAnalysisTime, setLastAnalysisTime] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
     const [ctaLoading, setCtaLoading] = useState('');
     const [hoveredPoint, setHoveredPoint] = useState(null);
@@ -127,7 +126,6 @@ export default function Dashboard() {
                     setRecent(dashboardData.recentAnalyses || []);
                     setProfile(dashboardData.user || null);
                     setProgressOverTime(dashboardData.progressOverTime || []);
-                    setLastAnalysisTime(dashboardData.lastAnalysisTime || null);
                     setLastUpdated(new Date().toISOString());
                 }
             } catch (e) {

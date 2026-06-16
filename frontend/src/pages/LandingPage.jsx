@@ -7,11 +7,9 @@ import HowItWorks from '../components/landing/HowItWorks';
 import ContactSection from '../components/landing/ContactSection';
 import Footer from '../components/landing/Footer';
 import './LandingPage.css';
-import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
   const [showSplash, setShowSplash] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {
