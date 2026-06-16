@@ -10,7 +10,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: true,
   credentials: true
 }));
 app.use(express.json());
@@ -53,6 +53,11 @@ app.use('/api/reports', require('./routes/reports'));
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running' });
+});
+
+// Render probe / favicon silence
+app.get(['/', '/favicon.ico'], (req, res) => {
+  res.json({ status: 'ok' });
 });
 
 // 404 handler
